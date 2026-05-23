@@ -50,12 +50,12 @@ export const Chat = ({
   };
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="flex flex-1 flex-col bg-background">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto flex max-w-4xl flex-col gap-4">
           {visibleMessages.length === 0 && (
-            <Card className="p-8 text-center bg-main">
+            <Card className="p-8 text-center">
               <h2 className="text-2xl font-black">
                 Start chatting
               </h2>
@@ -81,12 +81,7 @@ export const Chat = ({
               >
                 <Card
                   className={`
-                    max-w-[85%] px-4 py-3
-                    ${
-                      isUser
-                        ? "bg-main"
-                        : "bg-secondary"
-                    }
+                    max-w-[85%] px-4 py-3 bg-amber-200
                   `}
                 >
                   <p className="whitespace-pre-wrap break-words text-sm">
