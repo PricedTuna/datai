@@ -3,7 +3,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { ollama } from 'ollama-ai-provider-v2';
 
-export const MODEL_REGISTRY: Record<ModelId, { provider: string; createModel(apiKey: string): any }> = {
+export const MODEL_REGISTRY: Record<ModelId, {isLocalThinking?: boolean; provider: string; createModel(apiKey: string): any }> = {
   "gemini-2.5-flash-preview": {
     provider: "google",
 

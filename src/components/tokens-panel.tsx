@@ -75,9 +75,6 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
       {/* Header */}
       <div className="flex items-center justify-between border-b-4 border-border px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center rounded-base border-2 border-border bg-main shadow-shadow shrink-0">
-            <Zap className="size-3.5 text-main-foreground" />
-          </div>
           <div>
             <p className="text-xs font-heading">Token usage</p>
             <p className="text-[10px] opacity-40 font-base">{calls.length} call{calls.length !== 1 ? "s" : ""}</p>

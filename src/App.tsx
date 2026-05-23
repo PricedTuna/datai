@@ -73,11 +73,10 @@ function App() {
   return (
     <SidebarProvider>
       <AppSidebar
-        chats={[...chats].sort((a, b) => b.createdAt - a.createdAt).map((c) => c.title)}
-        activeChat={currentChat?.title ?? ""}
-        onSelectChat={(title) => {
-          const chat = chats.find((c) => c.title === title);
-          if (chat) selectChat(chat.id);
+        chats={[...chats].sort((a, b) => b.createdAt - a.createdAt).map((c) => ({ id: c.id, title: c.title }))}
+        activeChat={currentChat?.id ?? ""}
+        onSelectChat={(id) => {
+          selectChat(id);
         }}
         onNewChat={handleNewChat}
         onSettingsClick={() => setApiKeysOpen(true)}

@@ -7,7 +7,8 @@ import type { ChatMessage } from "@/interfaces/chat";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { encode as toonEncode } from "@toon-format/toon";
-import { loon } from "loon-core";
+import { getSpec, loon } from "loon-core";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export interface ChatProps {
   messages: ChatMessage[];
@@ -147,6 +148,7 @@ export const Chat = ({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [encoding, setEncoding] = useState<string>("normal");
+  const [includeSpec, setIncludeSpec] = useState(false);
 
   const handleDatasetSend = async () => {
     if (!selectedFile) return;
@@ -160,6 +162,10 @@ export const Chat = ({
         if (encoding === "loon") {
           const arr = Array.isArray(parsed) ? parsed : [parsed];
           payload = loon.toLOON(arr, { mode: 'llm' });
+          if (includeSpec) {
+            const spec = getSpec(payload).text;
+            payload = `${spec}\n\n${payload}`;
+          }
         } else if (encoding === "toon") {
           payload = toonEncode(parsed);
         }
@@ -168,6 +174,7 @@ export const Chat = ({
       setIsSettingsOpen(false);
       setSelectedFile(null);
       setEncoding("normal");
+      setIncludeSpec(false);
     } catch (err) {
       console.error("Error formatting dataset", err);
       alert("Error processing the dataset file.");
@@ -264,6 +271,22 @@ export const Chat = ({
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {encoding === "loon" && (
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Checkbox 
+                          id="include-spec" 
+                          checked={includeSpec} 
+                          onCheckedChange={(checked) => setIncludeSpec(checked as boolean)} 
+                        />
+                        <label 
+                          htmlFor="include-spec" 
+                          className="text-sm font-base cursor-pointer"
+                        >
+                          Agregar spec de explicación (mejorar la comprensión)
+                        </label>
+                      </div>
+                    )}
                   </div>
                   
                   <Dialog.Description className="sr-only">Upload and encode a JSON dataset.</Dialog.Description>

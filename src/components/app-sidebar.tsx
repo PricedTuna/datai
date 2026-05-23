@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  chats: string[];
+  chats: { id: string; title: string }[];
   activeChat: string;
-  onSelectChat: (chat: string) => void;
+  onSelectChat: (id: string) => void;
   onNewChat?: () => void;
   onSettingsClick?: () => void;
 }
@@ -52,10 +52,10 @@ export function AppSidebar({ chats, activeChat, onSelectChat, onNewChat, onSetti
           <SidebarGroupLabel className="text-[11px] uppercase tracking-widest opacity-50 font-heading px-3 py-2">Recent chats</SidebarGroupLabel>
           <SidebarMenu>
             {chats.map((chat) => (
-              <SidebarMenuItem key={chat}>
-                <SidebarMenuButton onClick={() => onSelectChat(chat)} isActive={chat === activeChat} className="gap-3 font-base">
+              <SidebarMenuItem key={chat.id}>
+                <SidebarMenuButton onClick={() => onSelectChat(chat.id)} isActive={chat.id === activeChat} className="gap-3 font-base">
                   <MessageCircle className="size-4 shrink-0" />
-                  <span className="truncate">{chat}</span>
+                  <span className="truncate">{chat.title}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
