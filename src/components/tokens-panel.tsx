@@ -2,6 +2,8 @@ import { X, Zap, ArrowDown, ArrowUp, Hash, DollarSign, Clock } from "lucide-reac
 import type { ChatSession } from "@/interfaces/chat";
 import { ModelLabel } from "@/interfaces/model";
 import { Button } from "@/components/ui/button";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface TokensPanelProps {
   chat: ChatSession | undefined;
@@ -54,6 +56,17 @@ function StatTile({
 export function TokensPanel({ chat, onClose }: TokensPanelProps) {
   const usage = chat?.totalUsage;
   const calls = chat?.calls ?? [];
+
+  const chartData = [
+    { category: "Input", tokens: usage?.inputTokens ?? 0, fill: "var(--color-chart-2)" },
+    { category: "Output", tokens: usage?.outputTokens ?? 0, fill: "var(--color-chart-4)" },
+  ];
+
+  const chartConfig = {
+    tokens: { label: "Tokens" },
+    Input: { label: "Input", color: "var(--color-chart-2)" },
+    Output: { label: "Output", color: "var(--color-chart-4)" },
+  };
 
   return (
     <aside
@@ -121,6 +134,20 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
                   sub="completion tokens"
                   accent="text-emerald-500"
                 />
+              </div>
+
+              {/* Chart */}
+              <div className="rounded-base border-2 border-border bg-secondary-background p-3 flex flex-col gap-2 shadow-shadow mt-4">
+                <p className="text-[10px] font-heading uppercase tracking-widest opacity-40">Input vs Output</p>
+                <ChartContainer config={chartConfig} className="h-[120px] w-full">
+                  <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="var(--color-border)" opacity={0.2} />
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="category" type="category" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-foreground)', fontSize: 10, fontFamily: 'inherit' }} width={50} />
+                    <ChartTooltip cursor={{ fill: 'var(--color-border)', opacity: 0.1 }} content={<ChartTooltipContent hideLabel />} />
+                    <Bar dataKey="tokens" radius={2} strokeWidth={2} stroke="var(--color-border)" />
+                  </BarChart>
+                </ChartContainer>
               </div>
             </section>
 
