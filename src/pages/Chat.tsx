@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { SendHorizonal, Bot, User, Sparkles } from "lucide-react";
+import { SendHorizonal, Bot, User, Sparkles, Settings, X, Upload } from "lucide-react";
 // import type { Message } from "@/interfaces/Message"; // impportar la nueva interface de mensajes (la custom con id y timestamp) y adaptar el componente para mandar mensaje 
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/interfaces/chat";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { encode as toonEncode } from "@toon-format/toon";
+import { loon } from "loon-core";
 
 export interface ChatProps {
   messages: ChatMessage[];
@@ -140,6 +144,36 @@ export const Chat = ({
     setInput("");
   };
 
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [encoding, setEncoding] = useState<string>("normal");
+
+  const handleDatasetSend = async () => {
+    if (!selectedFile) return;
+    try {
+      const text = await selectedFile.text();
+      let payload = "";
+      if (encoding === "normal") {
+        payload = text;
+      } else {
+        const parsed = JSON.parse(text);
+        if (encoding === "loon") {
+          const arr = Array.isArray(parsed) ? parsed : [parsed];
+          payload = loon.toLOON(arr);
+        } else if (encoding === "toon") {
+          payload = toonEncode(parsed);
+        }
+      }
+      onSendMessage(payload);
+      setIsSettingsOpen(false);
+      setSelectedFile(null);
+      setEncoding("normal");
+    } catch (err) {
+      console.error("Error formatting dataset", err);
+      alert("Error processing the dataset file.");
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -182,6 +216,70 @@ export const Chat = ({
       {/* ── Input bar ─────────────────────────────────────── */}
       <div className="border-t-4 border-border bg-background p-4">
         <div className="mx-auto flex max-w-3xl gap-3">
+          
+          {/* Settings Modal Trigger */}
+          <Dialog.Root open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <Dialog.Trigger asChild>
+              <Button variant="neutral" size="icon" className="size-[52px] shrink-0 mb-0">
+                <Settings className="size-5" />
+              </Button>
+            </Dialog.Trigger>
+            <Dialog.Portal>
+              <Dialog.Overlay className="fixed inset-0 z-50 bg-overlay/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+              <Dialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] rounded-base border-4 border-border bg-background p-6 shadow-shadow duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <Dialog.Title className="text-xl font-heading">Dataset Upload</Dialog.Title>
+                    <Dialog.Close asChild>
+                      <Button variant="neutral" size="icon" className="size-8 hidden sm:flex">
+                        <X className="size-4" />
+                      </Button>
+                    </Dialog.Close>
+                  </div>
+                  
+                  <div className="space-y-4 py-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-base font-bold">Select JSON Dataset</label>
+                      <label className="flex items-center justify-center w-full h-32 px-4 transition bg-secondary-background border-2 border-border border-dashed rounded-base appearance-none cursor-pointer hover:border-main focus:outline-hidden">
+                        <span className="flex flex-col items-center gap-2">
+                          <Upload className="size-8 text-foreground" />
+                          <span className="font-medium text-center text-foreground text-sm">
+                            {selectedFile ? selectedFile.name : "Drop .json file here or click to browse"}
+                          </span>
+                        </span>
+                        <input type="file" name="file_upload" accept=".json" className="hidden" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
+                      </label>
+                    </div>
+                    
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-base font-bold">Encoding Format</label>
+                      <Select value={encoding} onValueChange={setEncoding}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="normal">Normal (JSON)</SelectItem>
+                          <SelectItem value="loon">LOON Encode</SelectItem>
+                          <SelectItem value="toon">TOON Encode</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <Dialog.Description className="sr-only">Upload and encode a JSON dataset.</Dialog.Description>
+                  <div className="flex justify-end gap-3 mt-4">
+                    <Button variant="neutral" onClick={() => setIsSettingsOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleDatasetSend} disabled={!selectedFile}>
+                      Load & Send
+                    </Button>
+                  </div>
+                </div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+
           <div className="relative flex-1">
             <textarea
               value={input}
