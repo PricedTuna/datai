@@ -150,7 +150,7 @@ export const Chat = ({
   const isEmpty = visibleMessages.length === 0;
 
   return (
-    <div className="flex flex-1 flex-col bg-background overflow-hidden" style={{ height: "calc(100vh - 4rem)" }}>
+    <div className="flex flex-1 min-w-0 flex-col bg-background overflow-hidden" style={{ height: "calc(100vh - 4rem)" }}>
 
       {/* ── Messages ──────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto p-6">

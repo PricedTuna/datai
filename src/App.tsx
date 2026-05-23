@@ -4,10 +4,12 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Chat } from "./pages/Chat";
 import { useChatStore } from "@/features/chat/chat-store";
-import { Cpu } from "lucide-react";
+import { Cpu, BarChart2 } from "lucide-react";
 import { ModelLabel } from "./interfaces/model";
 import type { ModelId } from "./interfaces/model";
 import { ApiKeysModal } from "@/components/api-keys-modal";
+import { TokensPanel } from "@/components/tokens-panel";
+import { Button } from "@/components/ui/button";
 
 const MODELS = Object.entries(ModelLabel).map(([value, label]) => ({ value: value as ModelId, label }));
 
@@ -27,6 +29,7 @@ function App() {
     currentChat?.modelId ?? MODELS[0].value
   );
   const [apiKeysOpen, setApiKeysOpen] = useState(false);
+  const [tokensOpen, setTokensOpen] = useState(false);
 
   const activeModel = MODELS.find((m) => m.value === selectedModel);
   const isModelLocked = (currentChat?.messages.filter((m) => m.role !== "system").length ?? 0) > 0;
@@ -116,15 +119,37 @@ function App() {
               </Select>
             )}
           </div>
+
+          {/* vertical divider */}
+          <div className="h-6 w-0.5 bg-border shrink-0" />
+
+          {/* Token usage toggle */}
+          <Button
+            onClick={() => setTokensOpen((o) => !o)}
+            title="Token usage"
+            variant={tokensOpen ? "default" : "neutral"}
+            size="icon"
+            className="size-9 shrink-0 shadow-shadow hover:shadow-none"
+          >
+            <BarChart2 className="size-4" />
+          </Button>
         </header>
 
-        {/* ── Chat area ───────────────────────────────────── */}
-        <Chat
-          messages={currentChat?.messages ?? []}
-          isLoading={isGenerating}
-          onSendMessage={(message) => sendMessage(message)}
-          modelLabel={activeModel?.label}
-        />
+        {/* ── Chat area + optional right panel ──────────────── */}
+        <div className="flex flex-1 overflow-hidden">
+          <Chat
+            messages={currentChat?.messages ?? []}
+            isLoading={isGenerating}
+            onSendMessage={(message) => sendMessage(message)}
+            modelLabel={activeModel?.label}
+          />
+          {tokensOpen && (
+            <TokensPanel
+              chat={currentChat}
+              onClose={() => setTokensOpen(false)}
+            />
+          )}
+        </div>
       </SidebarInset>
       <ApiKeysModal open={apiKeysOpen} onClose={handleCloseApiKeys} />
     </SidebarProvider>
