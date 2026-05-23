@@ -1,4 +1,5 @@
 import { MessageCircle, Plus, Bot, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -17,6 +18,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   activeChat: string;
   onSelectChat: (chat: string) => void;
   onNewChat?: () => void;
+  onSettingsClick?: () => void;
 }
 
 export function AppSidebar({
@@ -24,8 +26,27 @@ export function AppSidebar({
   activeChat,
   onSelectChat,
   onNewChat,
+  onSettingsClick,
   ...props
 }: AppSidebarProps) {
+  const [hasKeys, setHasKeys] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      setHasKeys(
+        !!localStorage.getItem("openai-api-key") ||
+          !!localStorage.getItem("google-api-key")
+      );
+    };
+    check();
+    // Re-check whenever modal closes (storage event for cross-tab; custom event for same-tab)
+    window.addEventListener("storage", check);
+    window.addEventListener("api-keys-updated", check);
+    return () => {
+      window.removeEventListener("storage", check);
+      window.removeEventListener("api-keys-updated", check);
+    };
+  }, []);
   return (
     <Sidebar {...props}>
       {/* ── Branding header ─────────────────────────────── */}
@@ -80,17 +101,33 @@ export function AppSidebar({
       </SidebarContent>
 
       {/* ── Footer status strip ───────────────────────────  */}
-      <SidebarFooter className="border-t-4 border-border px-4 py-3">
-        <div className="flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center rounded-base border-2 border-border bg-secondary-background">
+      <SidebarFooter className="border-t-4 border-border px-0 py-0">
+        <button
+          onClick={onSettingsClick}
+          className="
+            w-full flex items-center gap-2
+            px-4 py-3
+            rounded-none
+            transition-all
+            hover:bg-secondary-background
+            active:bg-main active:text-main-foreground
+            cursor-pointer
+            group
+          "
+        >
+          <div className="flex size-7 items-center justify-center rounded-base border-2 border-border bg-secondary-background group-hover:bg-main group-hover:text-main-foreground group-active:bg-background transition-colors shrink-0">
             <Zap className="size-3.5" />
           </div>
-          <div className="leading-tight">
+          <div className="leading-tight text-left">
             <p className="text-xs font-heading">Settings</p>
             <p className="text-[11px] opacity-50">Setup your models api-keys</p>
           </div>
-          <span className="ml-auto size-2 rounded-full bg-amber-400 border border-border" />
-        </div>
+          <span
+            className={`ml-auto size-2 rounded-full border border-border shrink-0 ${
+              hasKeys ? "bg-emerald-400" : "bg-amber-400"
+            }`}
+          />
+        </button>
       </SidebarFooter>
     </Sidebar>
   );

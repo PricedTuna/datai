@@ -7,6 +7,7 @@ import { useChatStore } from "@/features/chat/chat-store";
 import { Cpu } from "lucide-react";
 import { ModelLabel } from "./interfaces/model";
 import type { ModelId } from "./interfaces/model";
+import { ApiKeysModal } from "@/components/api-keys-modal";
 
 const MODELS = Object.entries(ModelLabel).map(([value, label]) => ({ value: value as ModelId, label }));
 
@@ -25,6 +26,7 @@ function App() {
   const [selectedModel, setSelectedModel] = useState<ModelId>(
     currentChat?.modelId ?? MODELS[0].value
   );
+  const [apiKeysOpen, setApiKeysOpen] = useState(false);
 
   const activeModel = MODELS.find((m) => m.value === selectedModel);
 
@@ -58,6 +60,12 @@ function App() {
     createChat(selectedModel);
   };
 
+  const handleCloseApiKeys = () => {
+    setApiKeysOpen(false);
+    // Notify sidebar dot to re-check keys
+    window.dispatchEvent(new Event("api-keys-updated"));
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar
@@ -68,6 +76,7 @@ function App() {
           if (chat) selectChat(chat.id);
         }}
         onNewChat={handleNewChat}
+        onSettingsClick={() => setApiKeysOpen(true)}
       />
       <SidebarInset>
         {/* ── Header ──────────────────────────────────────── */}
@@ -109,6 +118,7 @@ function App() {
           modelLabel={activeModel?.label}
         />
       </SidebarInset>
+      <ApiKeysModal open={apiKeysOpen} onClose={handleCloseApiKeys} />
     </SidebarProvider>
   );
 }
