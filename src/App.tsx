@@ -29,6 +29,7 @@ function App() {
   const [apiKeysOpen, setApiKeysOpen] = useState(false);
 
   const activeModel = MODELS.find((m) => m.value === selectedModel);
+  const isModelLocked = (currentChat?.messages.filter((m) => m.role !== "system").length ?? 0) > 0;
 
   // Sync dropdown to the current chat's model when switching chats
   const prevChatId = useRef(currentChat?.id);
@@ -95,18 +96,25 @@ function App() {
               <Cpu className="size-3.5 shrink-0" />
               <span className="text-[11px] font-heading uppercase tracking-wide">Model</span>
             </div>
-            <Select value={selectedModel} onValueChange={(v) => handleModelChange(v as ModelId)}>
-              <SelectTrigger className="w-[175px] h-9 text-sm font-base border-2 border-border shadow-shadow">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MODELS.map((m) => (
-                  <SelectItem key={m.value} value={m.value} className="font-base text-sm">
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isModelLocked ? (
+              /* Read-only badge when chat already has messages */
+              <div className="flex h-9 w-[175px] items-center rounded-base border-2 border-border bg-secondary-background px-3 shadow-shadow opacity-70 cursor-not-allowed">
+                <span className="text-sm font-base truncate">{activeModel?.label ?? selectedModel}</span>
+              </div>
+            ) : (
+              <Select value={selectedModel} onValueChange={(v) => handleModelChange(v as ModelId)}>
+                <SelectTrigger className="w-[175px] h-9 text-sm font-base border-2 border-border shadow-shadow">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MODELS.map((m) => (
+                    <SelectItem key={m.value} value={m.value} className="font-base text-sm">
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </header>
 

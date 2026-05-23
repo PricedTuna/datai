@@ -31,7 +31,7 @@ function ThinkingDots() {
 }
 
 /* ── Empty state ─────────────────────────────────────────── */
-function EmptyState({ modelLabel }: { modelLabel?: string }) {
+function EmptyState({ modelLabel, onSendMessage }: { modelLabel?: string; onSendMessage: (msg: string) => void }) {
   const prompts = [
     "Explain quantum entanglement simply",
     "Write a haiku about neobrutalism",
@@ -59,6 +59,7 @@ function EmptyState({ modelLabel }: { modelLabel?: string }) {
         {prompts.map((prompt) => (
           <button
             key={prompt}
+            onClick={() => onSendMessage(prompt)}
             className="
               rounded-base border-2 border-border bg-secondary-background
               px-4 py-3 text-left text-sm font-base
@@ -154,7 +155,7 @@ export const Chat = ({
       {/* ── Messages ──────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto p-6">
         {isEmpty && !isLoading ? (
-          <EmptyState modelLabel={modelLabel} />
+          <EmptyState modelLabel={modelLabel} onSendMessage={onSendMessage} />
         ) : (
           <div className="mx-auto flex max-w-3xl flex-col gap-6">
             {visibleMessages.map((message) => (

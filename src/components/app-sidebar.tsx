@@ -78,7 +78,7 @@ export function AppSidebar({
             Recent chats
           </SidebarGroupLabel>
           <SidebarMenu>
-            {chats.map((chat, i) => (
+            {chats.map((chat) => (
               <SidebarMenuItem key={chat}>
                 <SidebarMenuButton
                   onClick={() => onSelectChat(chat)}
@@ -87,12 +87,6 @@ export function AppSidebar({
                 >
                   <MessageCircle className="size-4 shrink-0" />
                   <span className="truncate">{chat}</span>
-                  {/* tiny accent badge on active */}
-                  {chat === activeChat && (
-                    <span className="ml-auto text-[10px] font-heading bg-main text-main-foreground border border-border px-1.5 py-0.5 rounded-sm">
-                      #{i + 1}
-                    </span>
-                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
