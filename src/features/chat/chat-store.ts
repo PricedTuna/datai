@@ -58,6 +58,7 @@ type ChatStore = {
   createChat: (modelId: ModelId) => void;
   selectChat: (chatId: string) => void;
   deleteChat: (chatId: string) => void;
+  setChatModel: (chatId: string, modelId: ModelId) => void;
 
   sendMessage: (text: string) => Promise<void>;
 };
@@ -119,6 +120,14 @@ export const useChatStore = create<ChatStore>()(
           chats: remainingChats,
           selectedChatId: newSelectedId,
         });
+      },
+
+      setChatModel(chatId, modelId) {
+        set((state) => ({
+          chats: state.chats.map((c) =>
+            c.id === chatId ? { ...c, modelId } : c
+          ),
+        }));
       },
 
       async sendMessage(text) {

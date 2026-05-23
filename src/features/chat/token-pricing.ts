@@ -10,6 +10,11 @@ const MODEL_PRICING: Record<ModelId, { inputPerMillion: number; outputPerMillion
     inputPerMillion: 1.10,
     outputPerMillion: 4.40,
   },
+
+  "llama3.2:1b": {
+    inputPerMillion: 0,
+    outputPerMillion: 0,
+  },
 };
 
 export function estimateCost(
