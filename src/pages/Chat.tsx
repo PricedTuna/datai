@@ -180,7 +180,7 @@ export const Chat = ({
 
       {/* ── Input bar ─────────────────────────────────────── */}
       <div className="border-t-4 border-border bg-background p-4">
-        <div className="mx-auto flex max-w-3xl gap-3 items-end">
+        <div className="mx-auto flex max-w-3xl gap-3">
           <div className="relative flex-1">
             <textarea
               value={input}
