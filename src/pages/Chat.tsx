@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SendHorizonal, Bot, User, Sparkles } from "lucide-react";
-import type { Message } from "@/interfaces/Message";
+// import type { Message } from "@/interfaces/Message"; // impportar la nueva interface de mensajes (la custom con id y timestamp) y adaptar el componente para mandar mensaje 
 import { cn } from "@/lib/utils";
+import type { ChatMessage } from "@/interfaces/chat";
 
 export interface ChatProps {
-  messages: Message[];
+  messages: ChatMessage[];
   onSendMessage: (message: string) => void;
   isLoading?: boolean;
   modelLabel?: string;
@@ -77,7 +78,7 @@ function EmptyState({ modelLabel }: { modelLabel?: string }) {
 }
 
 /* ── Message bubble ──────────────────────────────────────── */
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
   return (
@@ -105,7 +106,7 @@ function MessageBubble({ message }: { message: Message }) {
             : "bg-secondary-background text-foreground"
         )}
       >
-        <p className="whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+        <p className="whitespace-pre-wrap break-words leading-relaxed">{message.content as string}</p>
       </div>
     </div>
   );

@@ -1,21 +1,13 @@
 import { useState } from "react";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Chat } from "./pages/Chat";
 import { useMessages } from "./hooks/useMessages";
 import { Cpu } from "lucide-react";
+import { ModelLabel } from "./interfaces/model";
 
-const MODELS = [
-  { value: "gemini-2.0-flash-preview", label: "Gemini 2.0 Flash" },
-  { value: "o3-mini", label: "O3 Mini" },
-];
+const MODELS = Object.entries(ModelLabel).map(([value, label]) => ({ value, label }));
 
 let chatCounter = 3;
 const INITIAL_CHATS = ["Chat 1", "Chat 2", "Chat 3"];
@@ -37,12 +29,7 @@ function App() {
 
   return (
     <SidebarProvider>
-      <AppSidebar
-        chats={chats}
-        activeChat={activeChat}
-        onSelectChat={setActiveChat}
-        onNewChat={handleNewChat}
-      />
+      <AppSidebar chats={chats} activeChat={activeChat} onSelectChat={setActiveChat} onNewChat={handleNewChat} />
       <SidebarInset>
         {/* ── Header ──────────────────────────────────────── */}
         <header className="flex h-16 shrink-0 items-center gap-3 border-b-4 border-border bg-background px-4">
@@ -76,12 +63,7 @@ function App() {
         </header>
 
         {/* ── Chat area ───────────────────────────────────── */}
-        <Chat
-          messages={messages}
-          isLoading={isLoading}
-          onSendMessage={(message) => sendMessage(message)}
-          modelLabel={activeModel?.label}
-        />
+        <Chat messages={messages} isLoading={isLoading} onSendMessage={(message) => sendMessage(message)} modelLabel={activeModel?.label} />
       </SidebarInset>
     </SidebarProvider>
   );
