@@ -73,7 +73,7 @@ function App() {
   return (
     <SidebarProvider>
       <AppSidebar
-        chats={chats.map((c) => c.title)}
+        chats={[...chats].sort((a, b) => b.createdAt - a.createdAt).map((c) => c.title)}
         activeChat={currentChat?.title ?? ""}
         onSelectChat={(title) => {
           const chat = chats.find((c) => c.title === title);

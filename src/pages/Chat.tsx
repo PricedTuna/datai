@@ -159,7 +159,7 @@ export const Chat = ({
         const parsed = JSON.parse(text);
         if (encoding === "loon") {
           const arr = Array.isArray(parsed) ? parsed : [parsed];
-          payload = loon.toLOON(arr);
+          payload = loon.toLOON(arr, { mode: 'llm' });
         } else if (encoding === "toon") {
           payload = toonEncode(parsed);
         }

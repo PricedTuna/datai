@@ -93,7 +93,9 @@ export const useChatStore = create<ChatStore>()(
         };
 
         set((state) => ({
-          chats: [chat, ...state.chats],
+          chats: [chat, ...state.chats].sort(
+            (a, b) => b.createdAt - a.createdAt
+          ),
           selectedChatId: chat.id,
         }));
       },
