@@ -105,7 +105,7 @@ function App() {
               </div>
             ) : (
               <Select value={selectedModel} onValueChange={(v) => handleModelChange(v as ModelId)}>
-                <SelectTrigger className="w-[175px] h-9 text-sm font-base border-2 border-border shadow-shadow">
+                <SelectTrigger className="w-[260px] h-9 text-sm font-base border-2 border-border shadow-shadow">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

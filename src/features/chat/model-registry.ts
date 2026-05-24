@@ -30,7 +30,7 @@ export const MODEL_REGISTRY: Record<ModelId, {isLocalThinking?: boolean; provide
   "llama3.2:1b": {
     provider: "ollama (local)",
 
-    createModel(apiKey: string) {
+    createModel() {
       return ollama("llama3.2:1b");
     },
   },
