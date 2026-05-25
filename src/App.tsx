@@ -136,7 +136,6 @@ function App() {
           </Button>
         </header>
 
-        {/* ── Chat area + animated right panel ──────────────── */}
         <div className="flex flex-1 overflow-hidden">
           <Chat
             messages={currentChat?.messages ?? []}
@@ -144,17 +143,13 @@ function App() {
             onSendMessage={(message) => sendMessage(message)}
             modelLabel={activeModel?.label}
           />
-          <div
-            className="shrink-0 transition-all duration-300 ease-linear overflow-hidden"
-            style={{ width: tokensOpen ? 280 : 0 }}
-          >
-            <TokensPanel
-              chat={currentChat}
-              onClose={() => setTokensOpen(false)}
-            />
-          </div>
         </div>
       </SidebarInset>
+      <TokensPanel
+        chat={currentChat}
+        open={tokensOpen}
+        onClose={() => setTokensOpen(false)}
+      />
       <ApiKeysModal open={apiKeysOpen} onClose={handleCloseApiKeys} />
     </SidebarProvider>
   );

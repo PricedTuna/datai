@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-interface TokensPanelProps {
+interface TokensPanelProps extends React.ComponentProps<typeof Sidebar> {
   chat: ChatSession | undefined;
-  onClose: () => void;
+  open?: boolean;
+  onClose?: () => void;
 }
 
 function formatTokens(n: number): string {
@@ -203,7 +206,8 @@ function useDownloadJson(chat: ChatSession | undefined) {
 }
 
 /* ── Main panel ────────────────────────────────────────────── */
-export function TokensPanel({ chat, onClose }: TokensPanelProps) {
+export function TokensPanel({ chat, open = false, onClose, ...props }: TokensPanelProps) {
+  const isMobile = useIsMobile();
   const usage = chat?.totalUsage;
   const calls = chat?.calls ?? [];
   const handleDownload = useDownloadJson(chat);
@@ -219,8 +223,8 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
     Output: { label: "Output", color: "var(--color-chart-4)" },
   };
 
-  return (
-    <Sidebar side="right" collapsible="none" className="w-[280px] shrink-0 border-l-4 border-border">
+  const panel = (
+    <Sidebar side="right" collapsible="none" className="w-[280px] shrink-0 border-l-4 border-border h-full" {...props}>
       <SidebarHeader className="flex-row items-center justify-between px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">
           <div>
@@ -351,6 +355,28 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
           </>
         )}
       </SidebarContent>
-    </Sidebar>
+      </Sidebar>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={(o) => { if (!o) onClose?.(); }}>
+        <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0 [&>button]:hidden">
+          {panel}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <div
+      className="fixed inset-y-0 right-0 z-40 transition-transform duration-300 ease-linear"
+      style={{
+        width: 280,
+        transform: open ? "translateX(0)" : "translateX(100%)",
+      }}
+    >
+      {panel}
+    </div>
   );
 }
