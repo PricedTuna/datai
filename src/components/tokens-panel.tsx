@@ -1,4 +1,4 @@
-import { X, Zap, ArrowDown, ArrowUp, Hash, DollarSign, Clock, Braces, ChevronDown, ChevronRight } from "lucide-react";
+import { X, Zap, ArrowDown, ArrowUp, Hash, DollarSign, Clock, Braces, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { useState } from "react";
 import type { ChatSession, Usage } from "@/interfaces/chat";
 import { ModelLabel } from "@/interfaces/model";
@@ -167,10 +167,45 @@ function CallCard({ call, index }: { call: { usage: Usage; modelId: string; time
   );
 }
 
+/* ── Download handler ────────────────────────────────────────── */
+function useDownloadJson(chat: ChatSession | undefined) {
+  return () => {
+    if (!chat) return;
+
+    const payload = {
+      session: {
+        title: chat.title,
+        model: ModelLabel[chat.modelId as keyof typeof ModelLabel] ?? chat.modelId,
+        createdAt: new Date(chat.createdAt).toISOString(),
+        totalUsage: chat.totalUsage,
+      },
+      breakdown: {
+        input: chat.totalUsage.inputTokenDetails ?? {},
+        output: chat.totalUsage.outputTokenDetails ?? {},
+      },
+      calls: chat.calls.map((call) => ({
+        id: call.id,
+        timestamp: new Date(call.timestamp).toISOString(),
+        model: ModelLabel[call.modelId as keyof typeof ModelLabel] ?? call.modelId,
+        usage: call.usage,
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `token-usage-${chat.id.slice(0, 8)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+}
+
 /* ── Main panel ────────────────────────────────────────────── */
 export function TokensPanel({ chat, onClose }: TokensPanelProps) {
   const usage = chat?.totalUsage;
   const calls = chat?.calls ?? [];
+  const handleDownload = useDownloadJson(chat);
 
   const chartData = [
     { category: "Input", tokens: usage?.inputTokens ?? 0, fill: "var(--color-chart-2)" },
@@ -195,14 +230,25 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
             <p className="text-[10px] opacity-40 font-base">{calls.length} call{calls.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
-        <Button
-          onClick={onClose}
-          variant="neutral"
-          size="icon"
-          className="size-7"
-        >
-          <X className="size-3.5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            onClick={handleDownload}
+            variant="neutral"
+            size="icon"
+            className="size-7"
+            title="Download JSON"
+          >
+            <Download className="size-3.5" />
+          </Button>
+          <Button
+            onClick={onClose}
+            variant="neutral"
+            size="icon"
+            className="size-7"
+          >
+            <X className="size-3.5" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
