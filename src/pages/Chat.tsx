@@ -287,7 +287,7 @@ export const Chat = ({
                           htmlFor="include-spec" 
                           className="text-sm font-base cursor-pointer"
                         >
-                          Agregar spec de explicación (mejorar la comprensión)
+                          Add explanation spec (improve understanding)
                         </label>
                       </div>
                     )}
