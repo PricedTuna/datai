@@ -5,6 +5,7 @@ import { ModelLabel } from "@/interfaces/model";
 import { Button } from "@/components/ui/button";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
 
 interface TokensPanelProps {
   chat: ChatSession | undefined;
@@ -219,11 +220,8 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
   };
 
   return (
-    <aside
-      className="flex h-full w-[280px] shrink-0 flex-col border-l-4 border-border bg-background overflow-hidden"
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between border-b-2 border-border px-4 py-3 shrink-0">
+    <Sidebar side="right" collapsible="none" className="w-[280px] shrink-0 border-l-4 border-border">
+      <SidebarHeader className="flex-row items-center justify-between px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">
           <div>
             <p className="text-xs font-heading">Token usage</p>
@@ -249,9 +247,9 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
             <X className="size-3.5" />
           </Button>
         </div>
-      </div>
+      </SidebarHeader>
 
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
+      <SidebarContent className="p-4 flex flex-col gap-5">
         {!chat || calls.length === 0 ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center opacity-40">
@@ -352,7 +350,7 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
             </section>
           </>
         )}
-      </div>
-    </aside>
+      </SidebarContent>
+    </Sidebar>
   );
 }

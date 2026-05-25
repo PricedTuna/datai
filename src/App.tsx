@@ -20,6 +20,7 @@ function App() {
     isGenerating,
     createChat,
     selectChat,
+    renameChat,
     setChatModel,
     sendMessage,
   } = useChatStore();
@@ -79,12 +80,13 @@ function App() {
           selectChat(id);
         }}
         onNewChat={handleNewChat}
+        onRenameChat={renameChat}
         onSettingsClick={() => setApiKeysOpen(true)}
       />
       <SidebarInset>
         {/* ── Header ──────────────────────────────────────── */}
-        <header className="flex h-16 shrink-0 items-center gap-3 border-b-4 border-border bg-background px-4">
-          <SidebarTrigger className="-ml-1 shrink-0" />
+        <header className="flex h-16 shrink-0 items-center gap-3 border-b-2 border-border bg-background px-4">
+          <SidebarTrigger variant="neutral" size="icon" className="size-9 shrink-0 shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none" />
 
           {/* vertical divider */}
           <div className="h-6 w-0.5 bg-border shrink-0" />
@@ -94,7 +96,7 @@ function App() {
 
           {/* Model selector */}
           <div className="flex items-center gap-2 shrink-0">
-            <div className="hidden sm:flex items-center gap-1.5 rounded-base border-2 border-border bg-secondary-background px-2.5 py-1 shadow-shadow">
+            <div className="hidden sm:flex items-center gap-1.5 rounded-base border-2 border-border bg-secondary-background px-2.5 py-1">
               <Cpu className="size-3.5 shrink-0" />
               <span className="text-[11px] font-heading uppercase tracking-wide">Model</span>
             </div>
@@ -134,7 +136,7 @@ function App() {
           </Button>
         </header>
 
-        {/* ── Chat area + optional right panel ──────────────── */}
+        {/* ── Chat area + animated right panel ──────────────── */}
         <div className="flex flex-1 overflow-hidden">
           <Chat
             messages={currentChat?.messages ?? []}
@@ -142,12 +144,15 @@ function App() {
             onSendMessage={(message) => sendMessage(message)}
             modelLabel={activeModel?.label}
           />
-          {tokensOpen && (
+          <div
+            className="shrink-0 transition-all duration-300 ease-linear overflow-hidden"
+            style={{ width: tokensOpen ? 280 : 0 }}
+          >
             <TokensPanel
               chat={currentChat}
               onClose={() => setTokensOpen(false)}
             />
-          )}
+          </div>
         </div>
       </SidebarInset>
       <ApiKeysModal open={apiKeysOpen} onClose={handleCloseApiKeys} />

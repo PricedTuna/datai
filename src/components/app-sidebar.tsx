@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageCircle, Plus, Bot, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader } from "@/components/ui/sidebar";
@@ -8,9 +9,40 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onSelectChat: (id: string) => void;
   onNewChat?: () => void;
   onSettingsClick?: () => void;
+  onRenameChat?: (id: string, title: string) => void;
 }
 
-export function AppSidebar({ chats, activeChat, onSelectChat, onNewChat, onSettingsClick, ...props }: AppSidebarProps) {
+export function AppSidebar({ chats, activeChat, onSelectChat, onNewChat, onSettingsClick, onRenameChat, ...props }: AppSidebarProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingId]);
+
+  const startEditing = useCallback((id: string, title: string) => {
+    setEditingId(id);
+    setEditValue(title);
+  }, []);
+
+  const commitEdit = useCallback(() => {
+    if (editingId && onRenameChat) {
+      const trimmed = editValue.trim();
+      if (trimmed) {
+        onRenameChat(editingId, trimmed);
+      }
+    }
+    setEditingId(null);
+  }, [editingId, editValue, onRenameChat]);
+
+  const cancelEdit = useCallback(() => {
+    setEditingId(null);
+  }, []);
+
   return (
     <Sidebar {...props}>
       {/* ── Branding header ─────────────────────────────── */}
@@ -43,7 +75,36 @@ export function AppSidebar({ chats, activeChat, onSelectChat, onNewChat, onSetti
               <SidebarMenuItem key={chat.id}>
                 <SidebarMenuButton onClick={() => onSelectChat(chat.id)} isActive={chat.id === activeChat} className="gap-3 font-base">
                   <MessageCircle className="size-4 shrink-0" />
-                  <span className="truncate">{chat.title}</span>
+                  {editingId === chat.id ? (
+                    <input
+                      ref={inputRef}
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.stopPropagation();
+                          commitEdit();
+                        } else if (e.key === "Escape") {
+                          e.stopPropagation();
+                          cancelEdit();
+                        }
+                      }}
+                      onBlur={commitEdit}
+                      onClick={(e) => e.stopPropagation()}
+                      onDoubleClick={(e) => e.stopPropagation()}
+                      className="flex-1 min-w-0 bg-transparent border-0 border-b-2 border-border outline-none text-sm font-base px-0 py-0 rounded-none"
+                    />
+                  ) : (
+                    <span
+                      className="truncate flex-1"
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        startEditing(chat.id, chat.title);
+                      }}
+                    >
+                      {chat.title}
+                    </span>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
