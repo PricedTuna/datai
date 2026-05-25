@@ -1,7 +1,7 @@
 import type { ModelId } from "@/interfaces/model";
 
 const MODEL_PRICING: Record<ModelId, { inputPerMillion: number; outputPerMillion: number }> = {
-  "gemini-2.5-flash-preview": {
+  "gemini-3-flash-preview": {
     inputPerMillion: 0.15,
     outputPerMillion: 0.60,
   },

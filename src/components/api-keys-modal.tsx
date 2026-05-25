@@ -138,7 +138,7 @@ export function ApiKeysModal({ open, onClose }: ApiKeysModalProps) {
           {/* Gemini */}
           <KeyField
             label="Google Gemini"
-            badge="gemini-2.5-flash"
+            badge="gemini-3-flash-preview"
             badgeColor="bg-blue-100 text-blue-800 border-blue-300"
             placeholder="AIza..."
             state={gemini}

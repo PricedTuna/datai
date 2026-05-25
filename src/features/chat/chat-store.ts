@@ -7,7 +7,7 @@ import type { ModelId } from "@/interfaces/model";
 
 function getApiKeyForModel(modelId: ModelId): string {
   switch (modelId) {
-    case "gemini-2.5-flash-preview": {
+    case "gemini-3-flash-preview": {
       const key = localStorage.getItem("google-api-key");
 
       if (!key) {

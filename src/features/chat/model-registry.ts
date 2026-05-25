@@ -4,7 +4,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { ollama } from 'ollama-ai-provider-v2';
 
 export const MODEL_REGISTRY: Record<ModelId, {isLocalThinking?: boolean; provider: string; createModel(apiKey: string): any }> = {
-  "gemini-2.5-flash-preview": {
+  "gemini-3-flash-preview": {
     provider: "google",
 
     createModel(apiKey: string) {
@@ -12,7 +12,7 @@ export const MODEL_REGISTRY: Record<ModelId, {isLocalThinking?: boolean; provide
         apiKey,
       });
 
-      return google("gemini-2.5-flash-preview");
+      return google("gemini-3-flash-preview");
     },
   },
 
