@@ -30,8 +30,8 @@ export function AppSidebar({ chats, activeChat, onSelectChat, onNewChat, onSetti
   return (
     <Sidebar {...props}>
       {/* ── Branding header ─────────────────────────────── */}
-      <SidebarHeader className="border-b-4 border-border px-4 py-4">
-        <div className="flex items-center gap-3 mb-4">
+      <SidebarHeader className="border-b-2 border-border px-4 pt-3">
+        <div className="flex items-center gap-3 mb-2">
           <div className="flex size-9 items-center justify-center rounded-base border-2 border-border bg-main shadow-shadow shrink-0">
             <Bot className="size-5 text-main-foreground" />
           </div>
@@ -40,14 +40,14 @@ export function AppSidebar({ chats, activeChat, onSelectChat, onNewChat, onSetti
             <p className="text-[11px] opacity-60 font-base">AI Chat MVP</p>
           </div>
         </div>
+        <Button className="w-full gap-2 mb-2 justify-center" onClick={onNewChat} size="sm">
+          <Plus className="size-4" />
+          New Chat
+        </Button>
       </SidebarHeader>
 
       {/* ── Chat list ─────────────────────────────────────  */}
       <SidebarContent>
-        <Button className="w-full gap-2 justify-center" onClick={onNewChat} size="sm">
-          <Plus className="size-4" />
-          New Chat
-        </Button>
         <SidebarGroup>
           <SidebarGroupLabel className="text-[11px] uppercase tracking-widest opacity-50 font-heading px-3 py-2">Recent chats</SidebarGroupLabel>
           <SidebarMenu>

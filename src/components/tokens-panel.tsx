@@ -223,14 +223,14 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
       className="flex h-full w-[280px] shrink-0 flex-col border-l-4 border-border bg-background overflow-hidden"
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b-4 border-border px-4 py-3 shrink-0">
+      <div className="flex items-center justify-between border-b-2 border-border px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">
           <div>
             <p className="text-xs font-heading">Token usage</p>
             <p className="text-[10px] opacity-40 font-base">{calls.length} call{calls.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Button
             onClick={handleDownload}
             variant="neutral"

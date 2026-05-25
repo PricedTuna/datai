@@ -7,8 +7,7 @@ import type { ChatMessage } from "@/interfaces/chat";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { encode as toonEncode } from "@toon-format/toon";
-// import { getSpec, loon } from "loon-core";
-import { getSpec, loon } from "../../LOON/dist/index";
+import { getSpec, loon } from "loon-core";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export interface ChatProps {
