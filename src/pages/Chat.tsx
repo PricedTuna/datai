@@ -318,7 +318,7 @@ export const Chat = ({
                 e.target.style.height = `${Math.min(e.target.scrollHeight, 140)}px`;
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Ask something… (Enter to send, Shift+Enter for newline)"
+              placeholder="Ask something…"
               rows={1}
               disabled={isLoading}
               className="

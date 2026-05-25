@@ -214,7 +214,7 @@ function KeyField({
       </div>
 
       <div className="flex gap-2">
-        <div className="relative flex-1">
+        <div className="relative flex-1 group">
           <input
             type={state.visible ? "text" : "password"}
             value={state.value}
@@ -235,15 +235,21 @@ function KeyField({
               outline-none
               placeholder:opacity-40
               transition-all
-              focus:translate-x-boxShadowX
-              focus:translate-y-boxShadowY
-              focus:shadow-none
+              group-focus-within:translate-x-boxShadowX
+              group-focus-within:translate-y-boxShadowY
+              group-focus-within:shadow-none
             "
           />
           <button
             type="button"
             onClick={onToggleVisible}
-            className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-opacity"
+            className="
+              absolute right-3 inset-y-0 flex items-center
+              opacity-50 hover:opacity-100
+              transition-all
+              group-focus-within:translate-x-boxShadowX
+              group-focus-within:translate-y-boxShadowY
+            "
           >
             {state.visible ? (
               <EyeOff className="size-4" />
@@ -254,22 +260,14 @@ function KeyField({
         </div>
 
         {state.value && (
-          <button
+          <Button
             type="button"
+            variant="neutral"
+            size="sm"
             onClick={onClear}
-            className="
-              flex items-center justify-center
-              rounded-base border-2 border-border
-              bg-secondary-background
-              px-3
-              text-xs font-heading
-              shadow-shadow
-              hover:bg-main hover:text-main-foreground
-              transition-colors
-            "
           >
             Clear
-          </button>
+          </Button>
         )}
       </div>
     </div>
