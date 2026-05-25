@@ -92,7 +92,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       {/* Avatar */}
       <div
         className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-base border-2 border-border shadow-shadow",
+          "flex size-8 shrink-0 items-center justify-center rounded-base border-2 shadow-shadow-sm border-border",
           isUser ? "bg-main" : "bg-secondary-background"
         )}
       >
@@ -106,7 +106,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       {/* Bubble */}
       <div
         className={cn(
-          "max-w-[78%] rounded-base border-2 border-border px-4 py-3 shadow-shadow text-sm",
+          "max-w-[78%] rounded-base border-2 border-border px-4 py-3 shadow-shadow-sm text-sm",
           isUser
             ? "bg-main text-main-foreground"
             : "bg-secondary-background text-foreground"
