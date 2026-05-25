@@ -1,5 +1,6 @@
-import { X, Zap, ArrowDown, ArrowUp, Hash, DollarSign, Clock } from "lucide-react";
-import type { ChatSession } from "@/interfaces/chat";
+import { X, Zap, ArrowDown, ArrowUp, Hash, DollarSign, Clock, Braces, ChevronDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import type { ChatSession, Usage } from "@/interfaces/chat";
 import { ModelLabel } from "@/interfaces/model";
 import { Button } from "@/components/ui/button";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -48,6 +49,120 @@ function StatTile({
       </div>
       <p className="text-lg font-heading leading-none">{value}</p>
       {sub && <p className="text-[10px] opacity-40 font-base">{sub}</p>}
+    </div>
+  );
+}
+
+/* ── Detail group / row ────────────────────────────────────── */
+function DetailGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <p className="text-[10px] font-base opacity-50">{label}</p>
+      <div className="flex flex-col gap-0.5 pl-3">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between text-[10px] font-base">
+      <span className="opacity-60">{label}</span>
+      <span className="font-mono">{value}</span>
+    </div>
+  );
+}
+
+/* ── Raw data toggle ───────────────────────────────────────── */
+function RawDataToggle({ raw }: { raw: Record<string, unknown> }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border-t border-border pt-2 mt-1">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 text-[10px] font-base opacity-40 hover:opacity-70 transition-opacity cursor-pointer"
+      >
+        {open ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+        <Braces className="size-3" />
+        Raw data
+      </button>
+      {open && (
+        <pre className="mt-1.5 text-[9px] font-mono leading-tight opacity-50 bg-background border border-border rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">
+          {JSON.stringify(raw, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+/* ── Call card ─────────────────────────────────────────────── */
+function CallCard({ call, index }: { call: { usage: Usage; modelId: string; timestamp: number; id: string }; index: number }) {
+  return (
+    <div className="rounded-base border-2 border-border bg-secondary-background p-3 flex flex-col gap-2">
+      {/* header */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-heading opacity-50">#{index}</span>
+        <div className="flex items-center gap-1 opacity-40">
+          <Clock className="size-3" />
+          <span className="text-[10px] font-base">{formatTime(call.timestamp)}</span>
+        </div>
+      </div>
+
+      {/* model badge */}
+      <span className="self-start text-[10px] font-mono border border-border rounded px-1.5 py-0.5 bg-background opacity-70">
+        {ModelLabel[call.modelId as keyof typeof ModelLabel] ?? call.modelId}
+      </span>
+
+      {/* token lines */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between text-[10px] font-base">
+          <span className="flex items-center gap-1">
+            <span className="size-1.5 rounded-full bg-blue-400 inline-block" />
+            In
+          </span>
+          <span className="font-mono">{formatTokens(call.usage.inputTokens)}</span>
+        </div>
+        {call.usage.inputTokenDetails?.cacheReadTokens ? (
+          <div className="flex items-center justify-between text-[10px] font-base pl-4 opacity-60">
+            <span>Cache read</span>
+            <span className="font-mono">{formatTokens(call.usage.inputTokenDetails.cacheReadTokens)}</span>
+          </div>
+        ) : null}
+        {call.usage.inputTokenDetails?.cacheWriteTokens ? (
+          <div className="flex items-center justify-between text-[10px] font-base pl-4 opacity-60">
+            <span>Cache write</span>
+            <span className="font-mono">{formatTokens(call.usage.inputTokenDetails.cacheWriteTokens)}</span>
+          </div>
+        ) : null}
+        <div className="flex items-center justify-between text-[10px] font-base">
+          <span className="flex items-center gap-1">
+            <span className="size-1.5 rounded-full bg-emerald-400 inline-block" />
+            Out
+          </span>
+          <span className="font-mono">{formatTokens(call.usage.outputTokens)}</span>
+        </div>
+        {call.usage.outputTokenDetails?.reasoningTokens ? (
+          <div className="flex items-center justify-between text-[10px] font-base pl-4 opacity-60">
+            <span>Reasoning</span>
+            <span className="font-mono">{formatTokens(call.usage.outputTokenDetails.reasoningTokens)}</span>
+          </div>
+        ) : null}
+        {call.usage.outputTokenDetails?.textTokens ? (
+          <div className="flex items-center justify-between text-[10px] font-base pl-4 opacity-60">
+            <span>Text</span>
+            <span className="font-mono">{formatTokens(call.usage.outputTokenDetails.textTokens)}</span>
+          </div>
+        ) : null}
+        <div className="flex items-center justify-between text-[10px] font-heading border-t border-border pt-1 mt-0.5">
+          <span className="opacity-60">Cost</span>
+          <span className="font-mono">{formatCost(call.usage.estimatedCostUsd)}</span>
+        </div>
+      </div>
+
+      {/* raw data toggle */}
+      {call.usage.raw && <RawDataToggle raw={call.usage.raw} />}
     </div>
   );
 }
@@ -146,6 +261,36 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
                   </BarChart>
                 </ChartContainer>
               </div>
+
+              {/* ── Detail breakdown ── */}
+              {(usage?.inputTokenDetails || usage?.outputTokenDetails) && (
+                <div className="rounded-base border-2 border-border bg-secondary-background p-3 flex flex-col gap-2 shadow-shadow mt-4">
+                  <p className="text-[10px] font-heading uppercase tracking-widest opacity-40">Token breakdown</p>
+                  {usage?.inputTokenDetails && (
+                    <DetailGroup label="Input">
+                      {usage.inputTokenDetails.noCacheTokens != null && (
+                        <DetailRow label="No cache" value={formatTokens(usage.inputTokenDetails.noCacheTokens)} />
+                      )}
+                      {usage.inputTokenDetails.cacheReadTokens != null && (
+                        <DetailRow label="Cache read" value={formatTokens(usage.inputTokenDetails.cacheReadTokens)} />
+                      )}
+                      {usage.inputTokenDetails.cacheWriteTokens != null && (
+                        <DetailRow label="Cache write" value={formatTokens(usage.inputTokenDetails.cacheWriteTokens)} />
+                      )}
+                    </DetailGroup>
+                  )}
+                  {usage?.outputTokenDetails && (
+                    <DetailGroup label="Output">
+                      {usage.outputTokenDetails.textTokens != null && (
+                        <DetailRow label="Text" value={formatTokens(usage.outputTokenDetails.textTokens)} />
+                      )}
+                      {usage.outputTokenDetails.reasoningTokens != null && (
+                        <DetailRow label="Reasoning" value={formatTokens(usage.outputTokenDetails.reasoningTokens)} />
+                      )}
+                    </DetailGroup>
+                  )}
+                </div>
+              )}
             </section>
 
             {/* ── Per-call breakdown ── */}
@@ -155,48 +300,7 @@ export function TokensPanel({ chat, onClose }: TokensPanelProps) {
               </p>
               <div className="flex flex-col gap-2">
                 {[...calls].reverse().map((call, idx) => (
-                  <div
-                    key={call.id}
-                    className="rounded-base border-2 border-border bg-secondary-background p-3 flex flex-col gap-2"
-                  >
-                    {/* call header */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-heading opacity-50">
-                        #{calls.length - idx}
-                      </span>
-                      <div className="flex items-center gap-1 opacity-40">
-                        <Clock className="size-3" />
-                        <span className="text-[10px] font-base">{formatTime(call.timestamp)}</span>
-                      </div>
-                    </div>
-
-                    {/* model badge */}
-                    <span className="self-start text-[10px] font-mono border border-border rounded px-1.5 py-0.5 bg-background opacity-70">
-                      {ModelLabel[call.modelId] ?? call.modelId}
-                    </span>
-
-                    {/* token bars */}
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center justify-between text-[10px] font-base">
-                        <span className="flex items-center gap-1">
-                          <span className="size-1.5 rounded-full bg-blue-400 inline-block" />
-                          In
-                        </span>
-                        <span className="font-mono">{formatTokens(call.usage.inputTokens)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] font-base">
-                        <span className="flex items-center gap-1">
-                          <span className="size-1.5 rounded-full bg-emerald-400 inline-block" />
-                          Out
-                        </span>
-                        <span className="font-mono">{formatTokens(call.usage.outputTokens)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] font-heading border-t border-border pt-1 mt-0.5">
-                        <span className="opacity-60">Cost</span>
-                        <span className="font-mono">{formatCost(call.usage.estimatedCostUsd)}</span>
-                      </div>
-                    </div>
-                  </div>
+                  <CallCard key={call.id} call={call} index={calls.length - idx} />
                 ))}
               </div>
             </section>

@@ -15,6 +15,16 @@ export type Usage = {
   outputTokens: number;
   totalTokens: number;
   estimatedCostUsd: number;
+  inputTokenDetails?: {
+    noCacheTokens?: number;
+    cacheReadTokens?: number;
+    cacheWriteTokens?: number;
+  };
+  outputTokenDetails?: {
+    textTokens?: number;
+    reasoningTokens?: number;
+  };
+  raw?: Record<string, unknown>;
 };
 
 export type ChatCall = {

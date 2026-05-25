@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { ChatSession, ChatMessage } from "@/interfaces/chat";
+import type { ChatSession, ChatMessage, ChatCall, Usage } from "@/interfaces/chat";
 import { sendMessage as sendMessageToLLM } from "@/features/chat/chat-service";
 import { estimateCost } from "@/features/chat/token-pricing";
 import type { ModelId } from "@/interfaces/model";
@@ -35,20 +35,6 @@ function getApiKeyForModel(modelId: ModelId): string {
       throw new Error("Modelo no soportado");
   }
 }
-
-type Usage = {
-  inputTokens: number;
-  outputTokens: number;
-  totalTokens: number;
-  estimatedCostUsd: number;
-};
-
-type ChatCall = {
-  id: string;
-  timestamp: number;
-  modelId: ModelId;
-  usage: Usage;
-};
 
 type ChatStore = {
   chats: ChatSession[];
@@ -185,15 +171,31 @@ export const useChatStore = create<ChatStore>()(
             messages: optimisticMessages,
           });
 
-          const usage = {
-            inputTokens: result.usage.inputTokens ?? 0,
-            outputTokens: result.usage.outputTokens ?? 0,
-            totalTokens: result.usage.totalTokens ?? 0,
+          const llmUsage = result.usage;
+
+          const usage: Usage = {
+            inputTokens: llmUsage.inputTokens ?? 0,
+            outputTokens: llmUsage.outputTokens ?? 0,
+            totalTokens: llmUsage.totalTokens ?? 0,
             estimatedCostUsd: estimateCost(
               chat.modelId,
-              result.usage.inputTokens ?? 0,
-              result.usage.outputTokens ?? 0
+              llmUsage.inputTokens ?? 0,
+              llmUsage.outputTokens ?? 0
             ),
+            inputTokenDetails: llmUsage.inputTokenDetails
+              ? {
+                  noCacheTokens: llmUsage.inputTokenDetails.noCacheTokens ?? undefined,
+                  cacheReadTokens: llmUsage.inputTokenDetails.cacheReadTokens ?? undefined,
+                  cacheWriteTokens: llmUsage.inputTokenDetails.cacheWriteTokens ?? undefined,
+                }
+              : undefined,
+            outputTokenDetails: llmUsage.outputTokenDetails
+              ? {
+                  textTokens: llmUsage.outputTokenDetails.textTokens ?? undefined,
+                  reasoningTokens: llmUsage.outputTokenDetails.reasoningTokens ?? undefined,
+                }
+              : undefined,
+            raw: llmUsage.raw as Record<string, unknown> | undefined,
           };
 
           const assistantMessage: ChatMessage = {
@@ -242,6 +244,60 @@ export const useChatStore = create<ChatStore>()(
                     c.totalUsage
                       .estimatedCostUsd +
                     usage.estimatedCostUsd,
+
+                  inputTokenDetails:
+                    usage.inputTokenDetails
+                      ? {
+                          noCacheTokens:
+                            (c.totalUsage
+                              .inputTokenDetails
+                              ?.noCacheTokens ??
+                              0) +
+                            (usage.inputTokenDetails
+                              .noCacheTokens ??
+                              0),
+                          cacheReadTokens:
+                            (c.totalUsage
+                              .inputTokenDetails
+                              ?.cacheReadTokens ??
+                              0) +
+                            (usage.inputTokenDetails
+                              .cacheReadTokens ??
+                              0),
+                          cacheWriteTokens:
+                            (c.totalUsage
+                              .inputTokenDetails
+                              ?.cacheWriteTokens ??
+                              0) +
+                            (usage.inputTokenDetails
+                              .cacheWriteTokens ??
+                              0),
+                        }
+                      : c.totalUsage
+                          .inputTokenDetails,
+
+                  outputTokenDetails:
+                    usage.outputTokenDetails
+                      ? {
+                          textTokens:
+                            (c.totalUsage
+                              .outputTokenDetails
+                              ?.textTokens ??
+                              0) +
+                            (usage.outputTokenDetails
+                              .textTokens ??
+                              0),
+                          reasoningTokens:
+                            (c.totalUsage
+                              .outputTokenDetails
+                              ?.reasoningTokens ??
+                              0) +
+                            (usage.outputTokenDetails
+                              .reasoningTokens ??
+                              0),
+                        }
+                      : c.totalUsage
+                          .outputTokenDetails,
                 },
               };
             }),
