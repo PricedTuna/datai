@@ -72,6 +72,7 @@
   body {
     @apply text-foreground font-base bg-background;
     font-family: 'JetBrains Mono Variable', monospace;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6{

@@ -85,32 +85,32 @@ function App() {
       />
       <SidebarInset>
         {/* ── Header ──────────────────────────────────────── */}
-        <header className="flex h-16 shrink-0 items-center gap-3 border-b-2 border-border bg-background px-4">
+        <header className="flex h-16 shrink-0 items-center gap-2 sm:gap-3 border-b-2 border-border bg-background px-3 sm:px-4 overflow-hidden">
           <SidebarTrigger variant="neutral" size="icon" className="size-9 shrink-0 shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none" />
 
           {/* vertical divider */}
-          <div className="h-6 w-0.5 bg-border shrink-0" />
+          <div className="hidden sm:block h-6 w-0.5 bg-border shrink-0" />
 
           {/* Chat title */}
           <h1 className="text-base font-heading truncate flex-1">{currentChat?.title ?? "Loon"}</h1>
 
           {/* Model selector */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="hidden sm:flex items-center gap-1.5 rounded-base border-2 border-border bg-secondary-background px-2.5 py-1">
+          <div className="flex items-center gap-2 shrink-0 min-w-0">
+            <div className="hidden sm:flex items-center gap-1.5 rounded-base border-2 border-border bg-secondary-background px-2.5 py-1 shrink-0">
               <Cpu className="size-3.5 shrink-0" />
               <span className="text-[11px] font-heading uppercase tracking-wide">Model</span>
             </div>
             {isModelLocked ? (
               /* Read-only badge when chat already has messages */
-              <div className="flex h-9 w-[175px] items-center rounded-base border-2 border-border bg-secondary-background px-3 shadow-shadow opacity-70 cursor-not-allowed">
+              <div className="flex h-9 w-[120px] sm:w-[175px] items-center rounded-base border-2 border-border bg-secondary-background px-3 shadow-shadow opacity-70 cursor-not-allowed shrink-0">
                 <span className="text-sm font-base truncate">{activeModel?.label ?? selectedModel}</span>
               </div>
             ) : (
               <Select value={selectedModel} onValueChange={(v) => handleModelChange(v as ModelId)}>
-                <SelectTrigger className="w-[260px] h-9 text-sm font-base border-2 border-border shadow-shadow">
-                  <SelectValue />
+                <SelectTrigger className="w-[110px] sm:w-[260px] h-9 text-sm font-base border-2 border-border shadow-shadow overflow-hidden">
+                  <SelectValue className="truncate" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-w-[calc(100vw-2rem)]">
                   {MODELS.map((m) => (
                     <SelectItem key={m.value} value={m.value} className="font-base text-sm">
                       {m.label}
@@ -122,7 +122,7 @@ function App() {
           </div>
 
           {/* vertical divider */}
-          <div className="h-6 w-0.5 bg-border shrink-0" />
+          <div className="hidden sm:block h-6 w-0.5 bg-border shrink-0" />
 
           {/* Token usage toggle */}
           <Button
@@ -136,7 +136,7 @@ function App() {
           </Button>
         </header>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden min-w-0">
           <Chat
             messages={currentChat?.messages ?? []}
             isLoading={isGenerating}

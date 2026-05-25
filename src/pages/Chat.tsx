@@ -106,7 +106,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       {/* Bubble */}
       <div
         className={cn(
-          "max-w-[78%] rounded-base border-2 border-border px-4 py-3 shadow-shadow-sm text-sm",
+          "max-w-[85%] sm:max-w-[78%] rounded-base border-2 border-border px-3 sm:px-4 py-3 shadow-shadow-sm text-sm",
           isUser
             ? "bg-main text-main-foreground"
             : "bg-secondary-background text-foreground"
@@ -195,10 +195,10 @@ export const Chat = ({
   const isEmpty = visibleMessages.length === 0;
 
   return (
-    <div className="flex flex-1 min-w-0 flex-col bg-background overflow-hidden" style={{ height: "calc(100vh - 4rem)" }}>
+    <div className="flex flex-1 min-w-0 flex-col bg-background overflow-hidden h-full">
 
       {/* ── Messages ──────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
         {isEmpty && !isLoading ? (
           <EmptyState modelLabel={modelLabel} onSendMessage={onSendMessage} />
         ) : (
@@ -226,12 +226,12 @@ export const Chat = ({
 
       {/* ── Input bar ─────────────────────────────────────── */}
       <div className="border-t-4 border-border bg-background p-4">
-        <div className="mx-auto flex max-w-3xl gap-3">
+        <div className="mx-auto flex max-w-3xl gap-2 sm:gap-3">
           
           {/* Settings Modal Trigger */}
           <Dialog.Root open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <Dialog.Trigger asChild>
-              <Button variant="neutral" size="icon" className="size-[52px] shrink-0 mb-0">
+              <Button variant="neutral" size="icon" className="size-[44px] sm:size-[52px] shrink-0 mb-0">
                 <Settings className="size-5" />
               </Button>
             </Dialog.Trigger>
@@ -342,7 +342,7 @@ export const Chat = ({
                 focus:translate-y-boxShadowY
                 focus:shadow-none
               "
-              style={{ minHeight: "52px", maxHeight: "140px", overflowY: "auto" }}
+              style={{ minHeight: "44px", maxHeight: "140px", overflowY: "auto" }}
             />
           </div>
 
@@ -350,7 +350,7 @@ export const Chat = ({
             onClick={handleSubmit}
             disabled={!input.trim() || isLoading}
             size="icon"
-            className="size-[52px] shrink-0 mb-0"
+            className="size-[44px] sm:size-[52px] shrink-0 mb-0"
           >
             <SendHorizonal className="size-5" />
           </Button>
