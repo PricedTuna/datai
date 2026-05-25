@@ -10,6 +10,7 @@ import type { ModelId } from "./interfaces/model";
 import { ApiKeysModal } from "@/components/api-keys-modal";
 import { TokensPanel } from "@/components/tokens-panel";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MODELS = Object.entries(ModelLabel).map(([value, label]) => ({ value: value as ModelId, label }));
 
@@ -32,7 +33,10 @@ function App() {
   const [apiKeysOpen, setApiKeysOpen] = useState(false);
   const [tokensOpen, setTokensOpen] = useState(false);
 
+  const isMobile = useIsMobile();
   const activeModel = MODELS.find((m) => m.value === selectedModel);
+  const modelLabel = activeModel?.label ?? selectedModel;
+  const displayLabel = isMobile && modelLabel.length > 4 ? modelLabel.slice(0, 4) + "..." : modelLabel;
   const isModelLocked = (currentChat?.messages.filter((m) => m.role !== "system").length ?? 0) > 0;
 
   // Sync dropdown to the current chat's model when switching chats
@@ -103,12 +107,12 @@ function App() {
             {isModelLocked ? (
               /* Read-only badge when chat already has messages */
               <div className="flex h-9 w-[120px] sm:w-[175px] items-center rounded-base border-2 border-border bg-secondary-background px-3 shadow-shadow opacity-70 cursor-not-allowed shrink-0">
-                <span className="text-sm font-base truncate">{activeModel?.label ?? selectedModel}</span>
+                <span className="text-sm font-base truncate">{displayLabel}</span>
               </div>
             ) : (
               <Select value={selectedModel} onValueChange={(v) => handleModelChange(v as ModelId)}>
-                <SelectTrigger className="w-[110px] sm:w-[260px] h-9 text-sm font-base border-2 border-border shadow-shadow overflow-hidden">
-                  <SelectValue className="truncate" />
+                <SelectTrigger className="w-[135px] sm:w-[260px] h-9 text-sm font-base border-2 border-border shadow-shadow overflow-hidden">
+                  <SelectValue className="truncate max-w-[110px] sm:max-w-none">{displayLabel}</SelectValue>
                 </SelectTrigger>
                 <SelectContent className="max-w-[calc(100vw-2rem)]">
                   {MODELS.map((m) => (

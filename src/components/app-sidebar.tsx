@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageCircle, Plus, Bot, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   chats: { id: string; title: string }[];
@@ -13,6 +13,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ chats, activeChat, onSelectChat, onNewChat, onSettingsClick, onRenameChat, ...props }: AppSidebarProps) {
+  const { setOpenMobile } = useSidebar();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -56,11 +57,11 @@ export function AppSidebar({ chats, activeChat, onSelectChat, onNewChat, onSetti
             <p className="text-[11px] opacity-60 font-base">AI Chat MVP</p>
           </div>
         </div>
-        <Button className="w-full gap-2 mb-2 justify-center" onClick={onNewChat} size="sm">
+        <Button className="w-full gap-2 mb-2 justify-center" onClick={() => { setOpenMobile(false); onNewChat?.(); }} size="sm">
           <Plus className="size-4" />
           New Chat
         </Button>
-        <Button className="w-full gap-2 mb-2 justify-center bg-white text-foreground shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none" onClick={onSettingsClick} size="sm">
+        <Button className="w-full gap-2 mb-2 justify-center bg-white text-foreground shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none" onClick={() => { setOpenMobile(false); onSettingsClick?.(); }} size="sm">
           <Zap className="size-4" />
           Setup api-keys
         </Button>
