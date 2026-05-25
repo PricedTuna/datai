@@ -127,6 +127,7 @@ export const Chat = ({
 }: ChatProps) => {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // hide system messages
   const visibleMessages = useMemo(
@@ -143,6 +144,9 @@ export const Chat = ({
     if (!trimmed || isLoading) return;
     onSendMessage(trimmed);
     setInput("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
   };
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -305,6 +309,7 @@ export const Chat = ({
 
           <div className="relative flex-1">
             <textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => {
                 setInput(e.target.value);
