@@ -1,6 +1,6 @@
 import { X, Zap, ArrowDown, ArrowUp, Hash, DollarSign, Clock, Braces, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { useState } from "react";
-import type { ChatSession, Usage } from "@/interfaces/chat";
+import type { ChatSession, Usage, DatasetEncoding } from "@/interfaces/chat";
 import { ModelLabel } from "@/interfaces/model";
 import { Button } from "@/components/ui/button";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -172,17 +172,65 @@ function CallCard({ call, index }: { call: { usage: Usage; modelId: string; time
 }
 
 /* ── Download handler ────────────────────────────────────────── */
+/** Schema version of this exported token-usage document. */
+const EXPORT_SCHEMA_VERSION = "1.1.0";
+
+/** Human-readable tag for a single dataset encoding, e.g. "loon/llm v3.2.0". */
+function encodingLabel(enc: DatasetEncoding): string {
+  if (enc.format === "loon") {
+    return `loon/${enc.mode ?? "auto"}${enc.loonVersion ? ` v${enc.loonVersion}` : ""}`;
+  }
+  return enc.format;
+}
+
 function useDownloadJson(chat: ChatSession | undefined) {
   return () => {
     if (!chat) return;
 
+    const encodings = chat.encodings ?? [];
+
+    // Distinct format tags used in this session — drives the export summary + filename.
+    const formatsUsed = [...new Set(encodings.map(encodingLabel))];
+    const fileTag =
+      formatsUsed.length === 0
+        ? "json"
+        : formatsUsed.length === 1
+          ? formatsUsed[0].replace(/[^a-z0-9.]+/gi, "-").replace(/-+$/, "")
+          : "mixed";
+
+    // Distinct source dataset file(s) used in this session.
+    const datasetsUsed = [...new Set(encodings.map((e) => e.fileName).filter((n): n is string => !!n))];
+    const datasetTag =
+      datasetsUsed.length === 1
+        ? datasetsUsed[0].replace(/\.json$/i, "").replace(/[^a-z0-9.]+/gi, "-").replace(/-+$/, "")
+        : datasetsUsed.length > 1
+          ? "multi"
+          : "";
+
     const payload = {
+      export: {
+        schema: "loon-landing/token-usage",
+        schemaVersion: EXPORT_SCHEMA_VERSION,
+        generatedAt: new Date().toISOString(),
+        generator: "loon-landing",
+      },
       session: {
+        id: chat.id,
         title: chat.title,
         model: ModelLabel[chat.modelId as keyof typeof ModelLabel] ?? chat.modelId,
+        modelId: chat.modelId,
         createdAt: new Date(chat.createdAt).toISOString(),
         totalUsage: chat.totalUsage,
       },
+      // Which wire format(s) the uploaded datasets were encoded with, and the LOON version.
+      formatsUsed,
+      // Which source dataset file(s) were used in this session.
+      datasetsUsed,
+      datasets: encodings.map((enc) => ({
+        ...enc,
+        label: encodingLabel(enc),
+        at: new Date(enc.at).toISOString(),
+      })),
       breakdown: {
         input: chat.totalUsage.inputTokenDetails ?? {},
         output: chat.totalUsage.outputTokenDetails ?? {},
@@ -191,6 +239,7 @@ function useDownloadJson(chat: ChatSession | undefined) {
         id: call.id,
         timestamp: new Date(call.timestamp).toISOString(),
         model: ModelLabel[call.modelId as keyof typeof ModelLabel] ?? call.modelId,
+        modelId: call.modelId,
         usage: call.usage,
       })),
     };
@@ -199,7 +248,7 @@ function useDownloadJson(chat: ChatSession | undefined) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `token-usage-${chat.id.slice(0, 8)}.json`;
+    a.download = `token-usage-${[datasetTag, fileTag].filter(Boolean).join("-")}-${chat.id.slice(0, 8)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -340,6 +389,34 @@ export function TokensPanel({ chat, open = false, onClose, ...props }: TokensPan
                 </div>
               )}
             </section>
+
+            {/* ── Dataset encoding(s) ── */}
+            {chat.encodings && chat.encodings.length > 0 && (
+              <section>
+                <p className="text-[10px] font-heading uppercase tracking-widest opacity-40 mb-2">
+                  Dataset format
+                </p>
+                <div className="flex flex-col gap-2">
+                  {chat.encodings.map((enc, i) => (
+                    <div key={i} className="rounded-base border-2 border-border bg-secondary-background p-2.5 flex flex-col gap-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono">{encodingLabel(enc)}</span>
+                        {enc.includeSpec && (
+                          <span className="text-[9px] font-mono border border-border rounded px-1 py-0.5 opacity-60">+spec</span>
+                        )}
+                      </div>
+                      {enc.fileName && <p className="text-[10px] opacity-50 font-base truncate">{enc.fileName}</p>}
+                      {enc.originalChars != null && enc.encodedChars != null && (
+                        <DetailRow
+                          label="chars"
+                          value={`${enc.originalChars.toLocaleString()} → ${enc.encodedChars.toLocaleString()}`}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* ── Per-call breakdown ── */}
             <section>

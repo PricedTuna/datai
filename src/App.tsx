@@ -24,6 +24,7 @@ function App() {
     renameChat,
     setChatModel,
     sendMessage,
+    recordEncoding,
   } = useChatStore();
 
   const currentChat = chats.find((c) => c.id === selectedChatId);
@@ -145,6 +146,7 @@ function App() {
             messages={currentChat?.messages ?? []}
             isLoading={isGenerating}
             onSendMessage={(message) => sendMessage(message)}
+            onEncodeDataset={recordEncoding}
             modelLabel={activeModel?.label}
           />
         </div>

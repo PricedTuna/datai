@@ -14,7 +14,7 @@ export async function sendMessage({ modelId, apiKey, messages }: SendMessagePara
   const model = MODEL_REGISTRY[modelId].createModel(apiKey);
 
   const result =
-    await generateText({ model, providerOptions: { ollama: { think: !!MODEL_REGISTRY[modelId].isLocalThinking } }, messages: toModelMessages(messages) });
+    await generateText({ model, messages: toModelMessages(messages) });
 
   return {
     text: result.text,

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "loon:build": "pnpm -C ../LOON exec tsup"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.79",
@@ -25,9 +26,8 @@
     "ai": "^6.0.191",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "loon-core": "^1.0.1",
+    "loon-core": "^1.0.7-alpha.0",
     "lucide-react": "^1.16.0",
-    "ollama-ai-provider-v2": "^3.5.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "recharts": "^3.8.1",

@@ -1,11 +1,17 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { ChatSession, ChatMessage, ChatCall, Usage } from "@/interfaces/chat";
+import type { ChatSession, ChatMessage, ChatCall, Usage, DatasetEncoding } from "@/interfaces/chat";
 import { sendMessage as sendMessageToLLM } from "@/features/chat/chat-service";
 import { estimateCost } from "@/features/chat/token-pricing";
 import type { ModelId } from "@/interfaces/model";
 
 function getApiKeyForModel(modelId: ModelId): string {
+  // LM Studio (local, OpenAI-compatible). Key is optional — LM Studio may run
+  // with or without auth — so return the configured key or a harmless dummy.
+  if (modelId.startsWith("lmstudio/")) {
+    return localStorage.getItem("lmstudio-api-key") || "lm-studio";
+  }
+
   switch (modelId) {
     case "gemini-3-flash-preview": {
       const key = localStorage.getItem("google-api-key");
@@ -27,10 +33,6 @@ function getApiKeyForModel(modelId: ModelId): string {
       return key;
     }
 
-    case "llama3.2:1b": {
-      return ""; // Ollama no requiere API key
-    }
-
     default:
       throw new Error("Modelo no soportado");
   }
@@ -46,6 +48,7 @@ type ChatStore = {
   deleteChat: (chatId: string) => void;
   renameChat: (chatId: string, title: string) => void;
   setChatModel: (chatId: string, modelId: ModelId) => void;
+  recordEncoding: (encoding: DatasetEncoding) => void;
 
   sendMessage: (text: string) => Promise<void>;
 };
@@ -56,6 +59,9 @@ const emptyUsage: Usage = {
   totalTokens: 0,
   estimatedCostUsd: 0,
 };
+
+/** Message contents longer than this are truncated when persisting to localStorage. */
+const MAX_PERSISTED_CONTENT = 20000;
 
 export const useChatStore = create<ChatStore>()(
   persist(
@@ -123,6 +129,18 @@ export const useChatStore = create<ChatStore>()(
         set((state) => ({
           chats: state.chats.map((c) =>
             c.id === chatId ? { ...c, modelId } : c
+          ),
+        }));
+      },
+
+      recordEncoding(encoding) {
+        const { selectedChatId } = get();
+        if (!selectedChatId) return;
+        set((state) => ({
+          chats: state.chats.map((c) =>
+            c.id === selectedChatId
+              ? { ...c, encodings: [...(c.encodings ?? []), encoding] }
+              : c
           ),
         }));
       },
@@ -349,10 +367,21 @@ export const useChatStore = create<ChatStore>()(
         () => localStorage
       ),
 
+      // localStorage caps at ~5MB. A dataset message (e.g. twitter.json ~570KB)
+      // blows the quota and the persisted `set` throws (QuotaExceededError),
+      // losing the write. Only the LIVE in-memory state needs the full payload
+      // (it was already sent to the API); the persisted copy can truncate large
+      // message bodies. This trims persistence only — runtime state is untouched.
       partialize: (state) => ({
-        chats: state.chats,
-        selectedChatId:
-          state.selectedChatId,
+        chats: state.chats.map((c) => ({
+          ...c,
+          messages: c.messages.map((m) =>
+            typeof m.content === "string" && m.content.length > MAX_PERSISTED_CONTENT
+              ? { ...m, content: m.content.slice(0, 2000) + `\n…[truncated ${m.content.length - 2000} chars in storage]` }
+              : m
+          ),
+        })),
+        selectedChatId: state.selectedChatId,
       }),
     }
   )

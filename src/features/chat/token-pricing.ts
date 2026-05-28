@@ -1,6 +1,7 @@
 import type { ModelId } from "@/interfaces/model";
 
-const MODEL_PRICING: Record<ModelId, { inputPerMillion: number; outputPerMillion: number }> = {
+// Partial: any model not listed (e.g. LM Studio local models) is free (0/0).
+const MODEL_PRICING: Partial<Record<ModelId, { inputPerMillion: number; outputPerMillion: number }>> = {
   "gemini-3-flash-preview": {
     inputPerMillion: 0.15,
     outputPerMillion: 0.60,
@@ -11,10 +12,7 @@ const MODEL_PRICING: Record<ModelId, { inputPerMillion: number; outputPerMillion
     outputPerMillion: 4.40,
   },
 
-  "llama3.2:1b": {
-    inputPerMillion: 0,
-    outputPerMillion: 0,
-  },
+  // Qwen (lmstudio/*, local) — unlisted → free via the fallback below.
 };
 
 export function estimateCost(
@@ -23,7 +21,7 @@ export function estimateCost(
   outputTokens: number
 ) {
   const pricing =
-    MODEL_PRICING[modelId];
+    MODEL_PRICING[modelId] ?? { inputPerMillion: 0, outputPerMillion: 0 };
 
   const inputCost =
     (inputTokens / 1_000_000) *

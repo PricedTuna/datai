@@ -1,0 +1,4 @@
+allowBuilds:
+  msw: set this to true or false
+minimumReleaseAgeExclude:
+  - loon-core@1.0.6
